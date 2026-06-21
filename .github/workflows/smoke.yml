@@ -1,0 +1,23 @@
+name: brew smoke test
+
+# Installs the published cask via this tap on macOS and checks that `subcor`
+# runs and reports a real version. The cask is machine-committed by the release
+# pipeline (subcor-main → GoReleaser), so this runs on a schedule + manually
+# rather than on push.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 14 * * 1" # Mondays, 14:00 UTC
+
+jobs:
+  smoke:
+    runs-on: macos-latest
+    steps:
+      - name: Install via tap
+        run: brew install subcor-ai/tap/subcor
+      - name: Verify subcor runs and reports a version
+        run: |
+          subcor --version
+          # Version line must be non-empty and not the dev fallback.
+          subcor --version | grep -vq '(devel)'
